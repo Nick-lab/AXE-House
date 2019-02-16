@@ -1,3 +1,23 @@
 <ion-app>
   <ion-router-outlet></ion-router-outlet>
 </ion-app>
+<div class="window" *ngIf="hasControls">
+  <!-- <div class="controls-left" [@back-button]="hasControls.back">
+    <a id="btn-back" class="button" (click)="onBack()">
+      <ion-icon name="ios-arrow-round-back"></ion-icon>
+    </a>
+  </div> [@title]="hasControls.back"-->
+  <h4 id="title">{{ title }}</h4>
+  <div class="controls">
+    <a id="btn-min" class="button" (click)="onMin()" *ngIf="hasControls.full">
+      <ion-icon name="md-remove"></ion-icon>
+    </a>
+    <a id="btn-max" class="button" (click)="onMax()" *ngIf="hasControls.full">
+      <ion-icon *ngIf="!fullscreen" name="md-square"></ion-icon>
+      <ion-icon *ngIf="fullscreen" name="ios-browsers"></ion-icon>
+    </a>
+    <a id="btn-close" class="button" (click)="onClose()">
+      <ion-icon name="md-close"></ion-icon>
+    </a>
+  </div>
+</div>

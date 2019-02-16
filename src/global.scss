@@ -9,3 +9,17 @@
 @import '~@ionic/angular/css/text-alignment.css';
 @import '~@ionic/angular/css/text-transformation.css';
 @import '~@ionic/angular/css/flex-utils.css';
+
+.ion-app{
+    .scroll-content{
+        position: absolute;
+        width: 100vw;
+        height: calc(100vh - 30px);
+        top: 30px;
+    }
+    .fixed-content{
+        position: absolute;
+        width: 100vw;
+        height: 100vh;
+    }
+}
