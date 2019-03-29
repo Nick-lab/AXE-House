@@ -2,13 +2,18 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const http = require('http');
 const server = http.createServer(app);
 const io = require('socket.io').listen(server);
-const socketHandler = require('./modules/socket');
 const fs = require('fs');
+const path = require('path');
 
-let localStorage = __dirname +'/storage/';
+global.paths = {};
+global.paths.root = __dirname;
+let localStorage = global.paths.storage = path.join(__dirname, 'storage');
 let win;
 let windows = [];
 const port = 3000;
+
+//import modules 
+const socketHandler = require('./modules/socket');
 
 function createWindow() {
   // Create the browser window.
@@ -127,7 +132,7 @@ function toFile(file) {
 }
 
 io.on('connection', (socket)=>{
-  socketHandler.process(socket);
+  socketHandler.process(socket, io);
 });
 
 // Create window on electron intialization

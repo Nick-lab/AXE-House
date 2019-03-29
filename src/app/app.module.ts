@@ -13,6 +13,7 @@ import { AppRoutingModule } from './app-routing.module';
 
 import { ElectronProvider } from './services/electron/electron';
 import { SocketIO } from './services/socket.provider';
+import { CameraController } from './services/camera.provider';
 
 @NgModule({
   declarations: [AppComponent],
@@ -29,6 +30,7 @@ import { SocketIO } from './services/socket.provider';
     SplashScreen,
     ElectronProvider,
     SocketIO,
+    CameraController,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
   bootstrap: [AppComponent]

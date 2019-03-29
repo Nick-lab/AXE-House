@@ -2,8 +2,10 @@
   
 </div>
 <div class="scroll-content">
-  <ion-content padding>
-    <p *ngIf="success">Success</p>
-  <ion-button (click)="onEmitTest()"></ion-button>
-  </ion-content>
+  <video autoplay id="Camera"></video>
+  <canvas id="Canvas"></canvas>
+  <span class="recording" *ngIf="camera.recording" [class.active]="camera.recording"></span>
+  <div class="buttons">
+    <ion-button (click)="onToggleRecord()">{{ camera.recording ? 'Stop Recording' : 'Start Recording' }}</ion-button>
+  </div>
 </div>

@@ -35,7 +35,7 @@ import { ElectronProvider } from './services/electron/electron';
 })
 export class AppComponent {
   fullscreen = this.electron.isFullScreen();
-  title = "Pheonix";
+  title = "AXE House";
   titleHold = false;
   hasControls = {
     full: true,

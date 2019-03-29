@@ -9,10 +9,8 @@ const { BrowserWindow } = electron.remote;
 */
 @Injectable()
 export class ElectronProvider {
-  ipc: any = electron.ipcRenderer;
-  constructor() {
-    
-  }
+  public ipc: any = electron.ipcRenderer;
+  constructor() { }
 
   openNewWindow(page = false) {
     if (page) {
