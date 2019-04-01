@@ -1,18 +1,27 @@
 import { Injectable } from "@angular/core";
 import { SocketIO } from "./socket.provider";
 import { Observable } from "rxjs";
+import { AlertController } from "ionic-angular";
 
 @Injectable()
 export class CameraController{
     private events = {};
     public recording = false;
 
-    constructor(private socket: SocketIO){
+    constructor(private socket: SocketIO, private alert: AlertController){
         this.socket.io.on('frame-data', (data)=>{
             if(data.noFrame){ this.recording = false; } else { this.recording = true; }
-            console.log('recording', this.recording);
             if(this.events['frame']) this.events['frame'](data);
         });
+
+        this.socket.io.on('camera-error', (data)=>{
+            let alert = this.alert.create({
+                title: 'Camera Error',
+                message: data.message ? data.message : 'Non Descript Camera Error: ' + data.error,
+                buttons: ['Ok']
+            });
+            alert.present();
+        })
     }
 
     public Init(){

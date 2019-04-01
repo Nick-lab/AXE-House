@@ -1,161 +1,139 @@
-html {
-    background-color: #282f35;
-  }
+// http://ionicframework.com/docs/theming/
 
-ion-router-outlet.ion-page {
-    height: 100%;
-
-    &:before {
-        content: '';
-        display: block;
-        height: calc(100% - 32px);
-        position: relative;
+ion-app {
+    border: 1px solid #ffffff;
+  
+    ion-modal{
+      top: 30px;
+      height: calc(100% - 30px);
+    }
+  
+    .app-root {
+      display: block;
+      overflow: hidden;
+      height: 100vh;
+  
+      ion-nav {
         top: 30px;
-        width: 100%;
-        background-color: #313a41;
-    }
-
-    ion-content {
-        background-color: unset;
-        color: rgb(200,200,200);
-        
-        .fixed-content {
-            z-index: 0;
-
-            #canvas-container {
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            top: 0;
-        
-                canvas {
-                    height: 100%;
-                    width: 100%;
-                }
+  
+        .ion-page {
+          height: calc(100% - 30px);
+  
+          ion-content{
+            .scroll-content{
+              overflow-y: auto;
             }
-
-            .background-img{
-            position: absolute;
-            height: calc(100% - 30px);
-            top: 30px;
-            width: 100%;
-            background-position: bottom;
-            background-size: cover;
-            background-repeat: no-repeat;
-            }
+          }
         }
-
-        .scroll-content {
-            overflow-y: auto;
-            z-index: 1;
-            position: relative;
-            height: calc(100% - 30px);
-            top: 30px;
+      }
+  
+      .window {
+        -webkit-user-select: none;
+        -webkit-app-region: drag;
+  
+        #title {
+          display: inline-block;
+          margin: 0;
+          padding: 6px 0px 6px 10px;
+          font-size: 15px;
+          position: relative;
         }
-
-    }
-}
-
-.window {
-    -webkit-user-select: none;
-    -webkit-app-region: drag;
-    background-color: #282f35;
-    color: #dadada;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 30px;
-
-    #title {
-        color: inherit;
-        display: inline-block;
-        margin: 0;
-        padding-left: 10px;
-        font-size: 15px;
-        position: relative;
-    }
-
-    .controls-left {
-        position: relative;
-        height: 100%;
-
-        .button {
-
+  
+        .controls-left {
+          display: inline-block;
+          float: left;
+          position: relative;
+  
+          .button {
+  
             ion-icon {
-                color: rgba(200,200,200,0.3);
-                top: 0px;
-                width: 100%;
-                height: 100%;
-                position: relative;
+              color: rgba(0,0,0,0.3);
             }
-
-            cursor: pointer;
+  
+            cursor: default;
             display: inline-block;
+            padding: 7px;
             text-align: center;
             width: 50px;
-            height: 100%;
+            height: 30px;
             -webkit-app-region: no-drag;
-        }
-
-        .button#btn-back {
+          }
+  
+          .button#btn-back {
             font-size: 32px;
             padding: 0px;
-        }
-
-        .button#btn-close:hover {
+  
+            ion-icon {
+              top: -4px;
+              position: relative;
+            }
+          }
+  
+          .button#btn-close:hover {
             background-color: rgba(200,0,0,1);
-
+  
             ion-icon {
-                color: rgba(255,255,255,1);
+              color: rgba(255,255,255,1);
             }
+          }
+  
+          .button:hover {
+            background-color: rgba(0,0,0,0.1);
+  
+            ion-icon {
+              color: rgba(0,0,0,1);
+            }
+          }
         }
-
-        .button:hover {
-            background-color: rgba(200,200,200,0.1);
-            
-
+  
+        .controls {
+          display: inline-block;
+          float: right;
+  
+          .button {
+  
             ion-icon {
-                color: rgba(200,200,200,1);
+              color: rgba(0,0,0,0.3);
             }
-        }
-    }
-
-    .controls {
-        display: inline-block;
-        height: 100%;
-
-        .button {
-
-            ion-icon {
-                color: rgba(200, 200, 200, 0.3);
-                width: 100%;
-                height: calc(100% - 12px);
-                padding: 6px 0px;
-            }
-
-            cursor: pointer;
+  
+            cursor: default;
             display: inline-block;
+            padding: 7px;
             text-align: center;
             width: 50px;
-            height: 100%;
+            height: 30px;
             -webkit-app-region: no-drag;
-            z-index: 1;
-        }
-
-        .button#btn-close:hover {
+          }
+  
+          .button#btn-close:hover {
             background-color: rgba(200,0,0,1);
-
+  
             ion-icon {
-                color: rgba(255,255,255,1);
+              color: rgba(255,255,255,1);
             }
-        }
-
-        .button:hover {
+          }
+  
+          .button:hover {
             background-color: rgba(0,0,0,0.1);
-
+  
             ion-icon {
-                color: rgba(200,200,200,1);
+              color: rgba(0,0,0,1);
             }
+          }
         }
+      }
     }
-}
+  }
+// App Global Sass
+// --------------------------------------------------
+// Put style rules here that you want to apply globally. These
+// styles are for the entire app and not just one component.
+// Additionally, this file can be also used as an entry point
+// to import other Sass files to be included in the output CSS.
+//
+// Shared Sass variables, which can be used to adjust Ionic's
+// default Sass variables, belong in "theme/variables.scss".
+//
+// To declare rules for a specific mode, create a child rule
+// for the .md, .ios, or .wp mode classes. The mode class is
+// automatically applied to the <body> element in the app.

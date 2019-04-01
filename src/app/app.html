@@ -1,0 +1,21 @@
+<div class="window" *ngIf="hasControls">
+    <div class="controls-left" [@back-button]="hasControls.back">
+      <div id="btn-back" class="button" (click)="onBack()">
+        <ion-icon name="ios-arrow-round-back"></ion-icon>
+      </div>
+    </div>
+    <h4 id="title" [@title]="hasControls.back">{{ title }}</h4>
+    <div class="controls">
+      <div id="btn-min" class="button" (click)="onMin()" *ngIf="hasControls.full">
+        <ion-icon name="md-remove"></ion-icon>
+      </div>
+      <div id="btn-max" class="button" (click)="onMax()" *ngIf="hasControls.full">
+        <ion-icon *ngIf="!fullscreen" name="md-square"></ion-icon>
+        <ion-icon *ngIf="fullscreen" name="ios-browsers"></ion-icon>
+      </div>
+      <div id="btn-close" class="button" (click)="onClose()">
+        <ion-icon name="md-close"></ion-icon>
+      </div>
+    </div>
+  </div>
+  <ion-nav [root]="rootPage" #Nav></ion-nav>
