@@ -13,11 +13,11 @@ function StartCapture() {
     camera.run();
 }
 
-function StopCapture(){
+function StopCapture() {
     camera.stop();
 }
 
-function Camera(){
+function Camera() {
     this.subject;
     this.vCap;
     this.stopCamera = false;
@@ -30,7 +30,7 @@ function Camera(){
     this.stopInit = false;
     this.interval;
     this.errors = [];
-    this.points = [];
+    this.points = {};
 
     this.init = (options) => {
         let keys = ['cv'];
@@ -44,9 +44,10 @@ function Camera(){
         if(!this.stopInit){
             this.stopCamera = false;
             this.subject = new Subject();
-            
             try {
                 this.vCap = new this.cv.VideoCapture(0);
+                this.rangeLower = new cv.Vec(50, 0, 0);
+                this.rangeUpper = new cv.Vec(100, 200, 200);
             } catch (err){
                 this.errors.push({
                     error: err,
@@ -65,39 +66,68 @@ function Camera(){
         if(this.errors.length > 0){
             this.subject.next(this.errors.shift());
         }
-        this.interval = setInterval(()=>{
+        this.interval = setInterval(() => {
             let returnData;
             this.time.now = new Date().getTime();
             if(!this.stopCamera){
                 returnData = {
-                    stop: this.stopCamera,
                     fps: 0,
-                    frame: null,
                     size: {
                         x: 640,
                         y: 480
                     },
-                    points: []
+                    points: {}
                 }
                 let frame;
                 if(this.vCap) frame = this.vCap.read();
                 if(frame){
                     returnData.size = { x: frame.cols, y: frame.rows };
-                    if(this.send_frame){
-                        returnData.frame = FrametoImage(frame);
-                    }
+                    
                     // pull points from frame
+                    // let thresh = this.cv.threshold(bFrame, 127,255,0);
+                    // returnData.contours = this.cv.findContours(thresh, this.cv.RETR_TREE, this.cv.CHAIN_APPROX_SIMPLE);
 
-
-                }else if(this.simulatePoints){
-                    // simulate points
-                    if(!this.simPoints){
-                        this.initSim();
-                    }
-                    for(let i = 0; i < this.simPoints.length; i++){
-                        let point = this.simPoints[i];
-                        point.update();
-                        returnData.points.push(point.getPointObject());
+                    if(this.send_frame){
+                        let blurred = frame.blur(new this.cv.Size(11,11));
+                        let hsv = blurred.cvtColor(this.cv.COLOR_BGR2HSV);
+                        let range = hsv.inRange(this.rangeLower, this.rangeUpper);
+                        //let mask = range.erode(this.cv.getStructuringElement(this.cv.MORPH_ELLIPSE, new this.cv.Size(4, 4)), new cv.Point(-1, -1), 2)
+                        let mask = range.dilate(this.cv.getStructuringElement(this.cv.MORPH_ELLIPSE, new this.cv.Size(3, 3)), new cv.Point(-1, -1), 3);
+                        let cnts = mask.findContours(this.cv.RETR_EXTERNAL, this.cv.CHAIN_APPROX_SIMPLE);
+                        if(cnts.length > 0){
+                            let newPoints = { };
+                            cnts.forEach((c)=>{
+                                let point = c.minEnclosingCircle();
+                                if(point.radius > 10){
+                                    let trackKeys = Object.keys(this.points);
+                                    if(trackKeys.length > 0){
+                                        // adjust tracking points
+                                        let pointTracked = false;
+                                        trackKeys.forEach((key, index)=>{
+                                            trackPoint = this.points[key];
+                                            let x = trackPoint.center.x - point.center.x;
+                                            let y = trackPoint.center.y - point.center.y;
+                                            if(Math.hypot(x,y) < 50){
+                                                newPoints[key] = point;
+                                                pointTracked = true;
+                                            }
+                                            if(trackKeys.length - 1 == index && !pointTracked){
+                                                let id = Math.random().toString(36).substr(2, 9);
+                                                newPoints[id] = point;
+                                            }
+                                        })
+                                    }else{
+                                        // add new tracking points
+                                        let id = Math.random().toString(36).substr(2, 9);
+                                        newPoints[id] = point;
+                                    }
+                                    
+                                    //returnData.points.push(circ);
+                                }
+                            })
+                            returnData.points = this.points = newPoints;
+                        }
+                        this.cv.imshow('range', mask);
                     }
                 }
                 // finish time calc
@@ -115,70 +145,10 @@ function Camera(){
         },0)
     }
 
-    this.initSim = () => {
-        this.simPoints = [];
-        for(let i = 0; i < 3; i++){
-            let point = new Point();
-            point.init({
-                size: {
-                    x: 640,
-                    y: 480,
-                },
-                vector: {
-                    x: (Math.random() * 2 - 1) * .5,
-                    y: (Math.random() * 2 - 1) * .5
-                },
-                pos: {
-                    x: Math.random() * 640,
-                    y: Math.random() * 480
-                }
-            })
-            this.simPoints.push(point);
-        }
-    }
-
     this.stop = () => {
         this.stopCamera = true;
         delete this.simPoints;
         delete this.simulatePoints;
-    }
-}
-
-function Point(){
-    this.id;
-    this.size = {
-        x: 0,
-        y: 0
-    };
-    this.pos = {
-        x: 0,
-        y: 0
-    };
-    this.init = (options) => {
-        this.id = Math.random().toString(36).substr(2, 9);
-        Object.keys(options).forEach((key)=>{this[key] = options[key];});
-    }
-    this.update = () => {
-        if(this.pos.x + this.vector.x < 0 || this.pos.x + this.vector.x > this.size.x){
-            this.vector.x = -this.vector.x;
-        }
-        if(this.pos.y + this.vector.y < 0 || this.pos.y + this.vector.y > this.size.y){
-            this.vector.y = -this.vector.y;
-        }
-        this.pos = {
-            x: this.pos.x + this.vector.x,
-            y: this.pos.y + this.vector.y
-        }
-    }
-    this.getPointObject = () => {
-        let tmp = {
-            id: this.id,
-            pos: {
-                x: this.pos.x * 100 / this.size.x,
-                y: this.pos.y * 100 / this.size.y
-            }
-        }
-        return tmp;
     }
 }
 

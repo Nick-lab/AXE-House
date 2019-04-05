@@ -7,12 +7,13 @@ function Process(socket, io){
 
     socket.on('camera-init', ()=>{
         console.log('Camera Init');
-        let subject = cvModule.init({send_frame: false, simulatePoints: true});
+        let subject = cvModule.init({send_frame: true});
         subject.subscribe((data)=>{
+            
             if(data.error){
-                io.to('camera').emit('camera-error', data);
+                global.windows['main-window'].webContents.send('camera-error', data);
             }else{
-                io.to('camera').emit('frame-data', data);
+                global.windows['main-window'].webContents.send('frame-data', data);
             }
         });
         cvModule.startCapture();

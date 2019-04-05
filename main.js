@@ -8,8 +8,7 @@ const path = require('path');
 global.paths = {};
 global.paths.root = __dirname;
 let localStorage = global.paths.storage = path.join(__dirname, 'storage');
-let win;
-let windows = [];
+global.windows = {};
 const port = 3000;
 
 //import modules 
@@ -17,7 +16,9 @@ const socketHandler = require('./modules/socket');
 
 function createWindow() {
   // Create the browser window.
-  win = new BrowserWindow({
+  let win = new BrowserWindow({
+    title: 'Axe House',
+    show: false,
     width: 1080,
     height: 600,
     minWidth: 800,
@@ -30,12 +31,19 @@ function createWindow() {
 
   //// uncomment below to open the DevTools.
 
-  win.webContents.openDevTools()
+  win.webContents.openDevTools();
+
+  win.on('ready-to-show', function (){
+    win.show();
+    win.focus();
+  } )
 
   // Event when the window is closed.
   win.on('closed', function () {
     win = null
-  })
+  });
+
+  global.windows['main-window'] = win;
 }
 
 function initializeLocalFile(file) {
@@ -79,7 +87,7 @@ ipcMain.on('open-window', (e, data) => {
     win = null;
   });
 
-  windows.push(win);
+  //windows.push(win);
 });
 
 
@@ -152,7 +160,7 @@ app.on('window-all-closed', function () {
 
 app.on('activate', function () {
   // macOS specific close process
-  if (win === null) {
+  if (global.windows['main-window'] === null) {
     createWindow()
   }
 });

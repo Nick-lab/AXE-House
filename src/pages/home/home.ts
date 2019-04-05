@@ -31,11 +31,8 @@ export class HomePage {
     this.game = new Phaser.Game(this.config);
     this.game.state.add('main', Default, true);
     console.log(this.game);
-
     this.camera.on('frame', (data)=>{
-      if(data.points){
-        this.game.points = data.points;
-      }
+      this.game.frameData = data;
     });
     this.camera.Init();
   }
@@ -44,41 +41,120 @@ export class HomePage {
 
 
 function Default() {
-  var arrow;
-  var target;
 }
 
 Default.prototype = {
   preload: function () {
-    this.load.image('arrow', 'assets/game_assets/sprites/longarrow.png');
     this.load.image('ball', 'assets/game_assets/sprites/pangball.png');
   },
   create: function () {
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.stage.backgroundColor = '#0072bc';
+    let style = {
+      font: 'bold 10pt Arial', 
+      fill: 'white', 
+      align: 'left'
+    }
+    this.fps = this.game.add.text(30,30, "FPS: ", style);
     this.points = {};
+    this.graphics = this.game.add.graphics(0,0);
+    this.showonce = true;
   },
   update: function () {
-    if(this.game.points && this.game.points.length > 0){
-      this.game.points.forEach(point => {
-        console.log(point);
-        let pos = {
-          x: point.pos.x * this.game.width / 100,
-          y: point.pos.y * this.game.height / 100
-        }
-        if(this.points[point.id]){
-          this.points[point.id].x = pos.x;
-          this.points[point.id].y = pos.y;
+    if(this.game.frameData && this.showonce){
+      console.log(this.game.frameData);
+      this.showonce = false;
+    }
+    
+    let pointKeys = Object.keys(this.points);
+    this.graphics.clear();
+    if(this.game.frameData && Object.keys(this.game.frameData.points).length > 0){
+      let newPoints = this.game.frameData.points;
+      let newKeys = Object.keys(this.game.frameData.points);
+      newKeys.forEach((k)=>{
+        if(pointKeys.indexOf(k) > -1){
+          this.updatePoint(k, newPoints[k].center);
         }else{
-          let point = this.add.sprite(pos.x,pos.y, 'ball');
-          point.anchor.setTo(0.5,0.5);
-          point.inputEnabled = true;
-          point.input.enableDrag(true);
-          this.points[point.id] = point;
+          this.createPoint(k, newPoints[k].center);
         }
       });
-      console.log(this.points);
+      pointKeys.forEach((k)=>{
+        if(!this.points[k].updated){
+          this.deletePoint(k);
+        }else{
+          this.points[k].updated = false;
+        }
+      })
+    }else if(pointKeys.length > 0){
+      pointKeys.forEach((k)=>{this.deletePoint(k);});
     }
+    if(pointKeys.length > 0){
+      pointKeys.forEach((k)=>{this.renderPoint(k);});
+    }
+    if(this.game.frameData) this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
+  },
+  
+  createPoint: function (key, pos) {
+    let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
+    name.anchor.setTo(0.5, 1);
+    this.points[key] = {
+      pos,
+      name,
+      counto: 1000
+    }
+  },
+
+  deletePoint: function (key) {
+    this.points[key].name.destroy();
+    delete this.points[key];
+  },
+
+  updatePoint: function (key, pos) {
+    let point = this.points[key];
+    point.lastPos = point.pos;
+    point.pos = {
+      x: this.lerp(point.lastPos.x, pos.x, .5),
+      y: this.lerp(point.lastPos.y, pos.y, .5)
+    };
+    point.updated = true;
+  },
+  renderPoint: function(key) {
+    if(this.points[key]){
+      let point = this.points[key];
+    
+      let pos = point.pos;
+      let r = 10;
+      let dist = 10;
+      this.graphics.lineStyle(0);
+      this.graphics.beginFill(0xFFFF0B, .5);
+      this.graphics.drawCircle(pos.x,pos.y,r);
+      this.graphics.endFill();
+      let xs = point.lastPos.x - pos.x;
+      let ys = point.lastPos.y - pos.y;
+      if(Math.hypot(xs,ys) < dist ){
+        if(point.tracking){
+          if(point.countat <= point.counto){
+            point.countat += this.game.time.elapsed;
+          }
+          point.lerped = this.lerp(point.lerped, point.countat, 0.5);
+          this.graphics.lineStyle(5, 0x000000, 1);
+          this.graphics.arc(pos.x, pos.y, 10, 0, point.lerped * (Math.PI * 2) / point.counto, false);
+        }else{
+          point.tracking = true;
+          point.countat = 0;
+        }
+      }else{
+        point.tracking = false;
+        point.countat = 0;
+        point.lerped = 0;
+      }
+
+      point.name.x = pos.x;
+      point.name.y = pos.y - r / 2;
+    }
+  },
+  lerp: function(start,end,amt){
+    return (1-amt)*start+amt*end;
   }
 }

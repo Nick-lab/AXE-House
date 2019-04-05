@@ -1,15 +1,15 @@
 import { Injectable } from "@angular/core";
 import { SocketIO } from "./socket.provider";
-import { Observable } from "rxjs";
 import { AlertController } from "ionic-angular";
+import { ElectronProvider } from "./electron/electron";
 
 @Injectable()
 export class CameraController{
     private events = {};
     public recording = false;
 
-    constructor(private socket: SocketIO, private alert: AlertController){
-        this.socket.io.on('frame-data', (data)=>{
+    constructor(private socket: SocketIO, private alert: AlertController, private electron: ElectronProvider){
+        this.electron.ipc.on('frame-data', (event, data)=>{
             if(data.noFrame){ this.recording = false; } else { this.recording = true; }
             if(this.events['frame']) this.events['frame'](data);
         });

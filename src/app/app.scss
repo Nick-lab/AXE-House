@@ -15,9 +15,10 @@ ion-app {
   
       ion-nav {
         top: 30px;
-  
+        height: calc(100% - 32px);
+
         .ion-page {
-          height: calc(100% - 30px);
+          
   
           ion-content{
             .scroll-content{
