@@ -23,7 +23,8 @@ function createWindow() {
     height: 600,
     minWidth: 800,
     minHeight: 500,
-    backgroundColor: '#ffffff',
+    //backgroundColor: '#ffffff',
+    transparent: true,
     frame: false,
     icon: './www/assets/icon/favicon.png'
   })
@@ -57,6 +58,8 @@ function initializeLocalFile(file) {
           res(true);
         }
       });
+    }else{
+      res(true);
     }
   });
 }
@@ -135,9 +138,6 @@ ipcMain.on('local-get', (e, obj) => {
   });
 });
 
-function toFile(file) {
-  let splitFile = file
-}
 
 io.on('connection', (socket)=>{
   socketHandler.process(socket, io);

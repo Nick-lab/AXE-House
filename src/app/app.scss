@@ -1,8 +1,9 @@
 // http://ionicframework.com/docs/theming/
 
 ion-app {
-    border: 1px solid #ffffff;
-  
+    border: 1px solid #cecece;
+    border-radius: 3px;
+    
     ion-modal{
       top: 30px;
       height: calc(100% - 30px);

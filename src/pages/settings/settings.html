@@ -1,0 +1,24 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-buttons end>
+            <button ion-button size="small" (click)="onClose()"><ion-icon name="close"></ion-icon></button>
+        </ion-buttons>
+        <ion-title>Settings</ion-title>
+    </ion-toolbar>
+</ion-header>
+<ion-content>
+    <ion-grid>
+        <ion-row>
+            <ion-col>
+                <h4>Preview</h4>
+                <ion-item>
+                    <ion-select (ionChange)="onSend()" [(ngModel)]="settings.preview">
+                        <ion-option value="none">None</ion-option>
+                        <ion-option value="raw">Raw</ion-option>
+                        <ion-option value="mask">Mask</ion-option>
+                    </ion-select>
+                </ion-item>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+</ion-content>

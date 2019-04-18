@@ -1,6 +1,5 @@
 const { Subject } = require('rxjs');
 const cv = require('opencv4nodejs');
-var camera;
 
 function Init(options){
     let passOptions = options;
@@ -11,6 +10,17 @@ function Init(options){
 
 function StartCapture() {
     camera.run();
+}
+
+function UpdateCamera(options) {
+    camera.updateSettings(options);
+}
+
+function GetSettings(socket) {
+    let tmp = {
+        preview: camera.preview
+    };
+    socket.emit('settings', tmp);
 }
 
 function StopCapture() {
@@ -31,6 +41,14 @@ function Camera() {
     this.interval;
     this.errors = [];
     this.points = {};
+    this.preview = 'mask';
+    
+    this.getSettings = (socket) => {
+        let tmp = {
+            preview: this.preview
+        };
+        socket.emit('settings', tmp);
+    }
 
     this.init = (options) => {
         let keys = ['cv'];
@@ -46,8 +64,8 @@ function Camera() {
             this.subject = new Subject();
             try {
                 this.vCap = new this.cv.VideoCapture(0);
-                this.rangeLower = new cv.Vec(50, 0, 0);
-                this.rangeUpper = new cv.Vec(100, 200, 200);
+                this.rangeLower = new cv.Vec(0, 200, 0);
+                this.rangeUpper = new cv.Vec(255, 255, 255);
             } catch (err){
                 this.errors.push({
                     error: err,
@@ -59,7 +77,7 @@ function Camera() {
     }
 
     this.updateSettings = (options) => {
-
+        Object.keys(options).forEach((key)=>{this[key] = options[key];});
     }
 
     this.run = () => {
@@ -89,11 +107,15 @@ function Camera() {
 
                     if(this.send_frame){
                         let blurred = frame.blur(new this.cv.Size(11,11));
-                        let hsv = blurred.cvtColor(this.cv.COLOR_BGR2HSV);
-                        let range = hsv.inRange(this.rangeLower, this.rangeUpper);
+                        let hsl = blurred.cvtColor(this.cv.COLOR_BGR2HLS);
+                        let range = hsl.inRange(this.rangeLower, this.rangeUpper);
                         //let mask = range.erode(this.cv.getStructuringElement(this.cv.MORPH_ELLIPSE, new this.cv.Size(4, 4)), new cv.Point(-1, -1), 2)
-                        let mask = range.dilate(this.cv.getStructuringElement(this.cv.MORPH_ELLIPSE, new this.cv.Size(3, 3)), new cv.Point(-1, -1), 3);
+                        let mask = range.dilate(this.cv.getStructuringElement(this.cv.MORPH_ELLIPSE, new this.cv.Size(4, 4)), new cv.Point(-1, -1), 3);
                         let cnts = mask.findContours(this.cv.RETR_EXTERNAL, this.cv.CHAIN_APPROX_SIMPLE);
+                        let selectFrames = {
+                            'raw': frame,
+                            'mask': mask
+                        }
                         if(cnts.length > 0){
                             let newPoints = { };
                             cnts.forEach((c)=>{
@@ -127,7 +149,11 @@ function Camera() {
                             })
                             returnData.points = this.points = newPoints;
                         }
-                        this.cv.imshow('range', mask);
+                        if(this.preview && this.preview != 'none'){
+                            this.cv.imshow('Preview', selectFrames[this.preview]);
+                        }else{
+                            this.cv.destroyAllWindows();
+                        }
                     }
                 }
                 // finish time calc
@@ -152,6 +178,10 @@ function Camera() {
     }
 }
 
+//module.exports = new Camera();
+
 module.exports.init = Init;
 module.exports.startCapture = StartCapture;
 module.exports.stopCapture = StopCapture;
+module.exports.updateCamera = UpdateCamera;
+module.exports.getSettings = GetSettings;

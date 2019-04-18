@@ -10,11 +10,13 @@ import { HomePage } from '../pages/home/home';
 import { ElectronProvider } from './services/electron/electron';
 import { SocketIO } from './services/socket.provider';
 import { CameraController } from './services/camera.provider';
+import { Settings } from '../pages/settings/settings';
 
 @NgModule({
   declarations: [
     MyApp,
-    HomePage
+    HomePage,
+    Settings
   ],
   imports: [
     BrowserModule,
@@ -24,7 +26,8 @@ import { CameraController } from './services/camera.provider';
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    HomePage
+    HomePage,
+    Settings
   ],
   providers: [
     StatusBar,

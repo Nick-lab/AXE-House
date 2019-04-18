@@ -1,10 +1,11 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, ModalController } from 'ionic-angular';
 import { CameraController } from '../../app/services/camera.provider';
 
 import "pixi";
 import "p2";
 import * as Phaser from 'phaser-ce';
+import { Settings } from '../settings/settings';
 
 
 @Component({
@@ -21,7 +22,7 @@ export class HomePage {
     parent: 'game-container'
   };
   game;
-  constructor(public navCtrl: NavController, private camera: CameraController) {
+  constructor(public navCtrl: NavController, private modal: ModalController, private camera: CameraController) {
 
   }
 
@@ -37,6 +38,10 @@ export class HomePage {
     this.camera.Init();
   }
 
+  onOpenSettings() {
+    this.modal.create(Settings).present();
+  }
+
 }
 
 
@@ -46,17 +51,14 @@ function Default() {
 Default.prototype = {
   preload: function () {
     this.load.image('ball', 'assets/game_assets/sprites/pangball.png');
+    this.game.load.spritesheet('pig', 'assets/game_assets/sprites/Piggy_sheet.png', 150,150, 8);
   },
   create: function () {
     this.physics.startSystem(Phaser.Physics.ARCADE);
 
     this.stage.backgroundColor = '#0072bc';
-    let style = {
-      font: 'bold 10pt Arial', 
-      fill: 'white', 
-      align: 'left'
-    }
-    this.fps = this.game.add.text(30,30, "FPS: ", style);
+    this.fps = this.game.add.text(30,30, "FPS: ", { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
+    this.pigs = [];
     this.points = {};
     this.graphics = this.game.add.graphics(0,0);
     this.showonce = true;
@@ -94,7 +96,17 @@ Default.prototype = {
     }
     if(this.game.frameData) this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
   },
-  
+  createPig: function(){
+    let pig = {
+      pos: {
+        x: 0,
+        y: 0
+      },
+      sprite: this.game.add.sprite(this.game.width / 2, this.game.height / 2, 'pig')
+    }
+    pig.sprite.animations.add('run');
+    pig.sprite.animations.play('run', 16, true);
+  },
   createPoint: function (key, pos) {
     let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
     name.anchor.setTo(0.5, 1);
@@ -156,5 +168,8 @@ Default.prototype = {
   },
   lerp: function(start,end,amt){
     return (1-amt)*start+amt*end;
+  },
+  baconBurst: function(pointer) {
+
   }
 }
