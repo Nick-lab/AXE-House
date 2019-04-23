@@ -7,12 +7,20 @@ import { NavController } from "ionic-angular";
     templateUrl: 'settings.html'
 })
 export class Settings{
-    settings = {
-
+    settings:any = {
+        rangeLower: {
+            h: 0,
+            s: 0,
+            l: 0
+        },
+        rangeUpper: {
+            h: 0,
+            s: 0,
+            l: 0
+        }
     }
 
     onSend(){
-        console.log(this.settings);
         this.socket.io.emit('camera-settings', this.settings);
     }
 
@@ -22,6 +30,7 @@ export class Settings{
 
     constructor(private socket: SocketIO, private navCtrl: NavController){
         this.socket.io.on('settings', (settings)=>{
+            console.log(settings);
             this.settings = settings;
         });
         this.socket.io.emit('camera-get-settings');

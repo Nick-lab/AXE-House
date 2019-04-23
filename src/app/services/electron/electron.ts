@@ -10,14 +10,11 @@ const { BrowserWindow } = electron.remote;
 @Injectable()
 export class ElectronProvider {
   public ipc: any = electron.ipcRenderer;
-  constructor() { }
-
-  openNewWindow(page = false) {
-    if (page) {
-
-    } else {
-      this.ipc.send('open-window', { id: 'something' });
-    }
+  public fullscreen: boolean = false;
+  constructor() {
+    window.addEventListener('resize', ()=>{
+      this.fullscreen = this.isFullScreen();
+    })
   }
 
   minimizeWindow() {
@@ -36,8 +33,7 @@ export class ElectronProvider {
     }
   }
   closeWindow() {
-    let window = BrowserWindow.getFocusedWindow();
-    window.close();
+    this.ipc.send('app-quit');
   }
 
   isFullScreen() {

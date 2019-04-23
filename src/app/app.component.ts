@@ -30,7 +30,6 @@ import { HomePage } from '../pages/home/home';
   ]
 })
 export class MyApp {
-  fullscreen = this.electron.isFullScreen();
   title = "AXE House";
   titleHold = false;
   hasControls = {
@@ -142,7 +141,7 @@ export class MyApp {
     this.electron.minimizeWindow();
   }
   onMax() {
-    this.fullscreen = this.electron.maximizeWindow();
+    this.electron.maximizeWindow();
   }
   onClose() {
     this.electron.closeWindow();

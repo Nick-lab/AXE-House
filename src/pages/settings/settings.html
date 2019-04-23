@@ -9,6 +9,30 @@
 <ion-content>
     <ion-grid>
         <ion-row>
+            <h4>Range Lower</h4>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.h"></ion-range>
+            </ion-col>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.l"></ion-range>
+            </ion-col>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.s"></ion-range>
+            </ion-col>
+        </ion-row>
+        <ion-row>
+            <h4>Range Upper</h4>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.h"></ion-range>
+            </ion-col>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.l"></ion-range>
+            </ion-col>
+            <ion-col>
+                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.s"></ion-range>
+            </ion-col>
+        </ion-row>
+        <ion-row>
             <ion-col>
                 <h4>Preview</h4>
                 <ion-item>
