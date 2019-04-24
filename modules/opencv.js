@@ -5,12 +5,7 @@ var CVWindow;
 var config;
 
 // setup IPC listeners from process window
-var once = true;
 ipcMain.on('frame-data', (e, data)=>{
-    if(once) {
-        console.log(data);
-        once = false;
-    }
     global.windows['main-window'].webContents.send('frame-data', data);
 });
 
@@ -20,8 +15,8 @@ function createWindow() {
         global.windows['CVWindow'] = CVWindow = new BrowserWindow({
             show: false
         })
-        CVWindow.loadURL(global.paths.root + '/remote/camera/camera.html');
-        CVWindow.webContents.openDevTools();
+        CVWindow.loadURL(global.paths.remote + '/camera/camera.html');
+        //CVWindow.webContents.openDevTools();
         CVWindow.webContents.on('did-finish-load', function() {
             res();
         });
@@ -45,8 +40,6 @@ function Init(){
             CVWindow.webContents.send('init', config);
         })
     })
-    
-    
 }
 
 function Calibrate(){

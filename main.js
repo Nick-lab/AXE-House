@@ -5,16 +5,16 @@ const io = require('socket.io').listen(server);
 const fs = require('fs');
 const path = require('path');
 const files = require('./modules/files');
+const loader = require('./modules/loader');
+const socketHandler = require('./modules/socket');
+const port = 3000;
 
 global.paths = {
   root: __dirname,
-  storage: path.join(__dirname, 'storage')
+  storage: path.join(__dirname, 'storage'),
+  remote: path.join(__dirname, 'remote')
 };
 global.windows = {};
-const port = 3000;
-
-//import modules 
-const socketHandler = require('./modules/socket');
 
 function createWindow() {
   // Create the browser window.
@@ -35,11 +35,6 @@ function createWindow() {
   //// uncomment below to open the DevTools.
 
   win.webContents.openDevTools();
-
-  win.on('ready-to-show', function (){
-    win.show();
-    win.focus();
-  } )
 
   // Event when the window is closed.
   win.on('closed', function () {
@@ -74,6 +69,7 @@ io.on('connection', (socket)=>{
 
 // Create window on electron intialization
 app.on('ready', () => {
+  loader.init();
   createWindow();
   files.initializeDirectory(global.paths.storage);
 })
