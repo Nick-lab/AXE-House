@@ -41,7 +41,6 @@ export class HomePage {
   onOpenSettings() {
     this.modal.create(Settings).present();
   }
-
 }
 
 
@@ -68,9 +67,29 @@ Default.prototype = {
       console.log(this.game.frameData);
       this.showonce = false;
     }
-    
-    let pointKeys = Object.keys(this.points);
     this.graphics.clear();
+    this.pointsProcess();
+    if(this.game.frameData) this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
+  },
+  createPig: function(){
+    let pig = {
+      pos: {
+        x: 0,
+        y: 0
+      },
+      sprite: this.game.add.sprite(this.game.width / 2, this.game.height / 2, 'pig')
+    }
+    pig.sprite.animations.add('run');
+    pig.sprite.animations.play('run', 16, true);
+  },
+  createPoint: function (key, pos) {
+    let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
+    name.anchor.setTo(0.5, 1);
+    this.points[key] = { pos, name, counto: 1000 };
+  },
+  pointsProcess: function () {
+    let pointKeys = this.points ? Object.keys(this.points) : [];
+    
     if(this.game.frameData && Object.keys(this.game.frameData.points).length > 0){
       let newPoints = this.game.frameData.points;
       let newKeys = Object.keys(this.game.frameData.points);
@@ -94,29 +113,7 @@ Default.prototype = {
     if(pointKeys.length > 0){
       pointKeys.forEach((k)=>{this.renderPoint(k);});
     }
-    if(this.game.frameData) this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
   },
-  createPig: function(){
-    let pig = {
-      pos: {
-        x: 0,
-        y: 0
-      },
-      sprite: this.game.add.sprite(this.game.width / 2, this.game.height / 2, 'pig')
-    }
-    pig.sprite.animations.add('run');
-    pig.sprite.animations.play('run', 16, true);
-  },
-  createPoint: function (key, pos) {
-    let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
-    name.anchor.setTo(0.5, 1);
-    this.points[key] = {
-      pos,
-      name,
-      counto: 1000
-    }
-  },
-
   deletePoint: function (key) {
     this.points[key].name.destroy();
     delete this.points[key];

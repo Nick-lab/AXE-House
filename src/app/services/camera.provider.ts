@@ -8,13 +8,14 @@ export class CameraController{
     private events = {};
     public recording = false;
 
+
     constructor(private socket: SocketIO, private alert: AlertController, private electron: ElectronProvider){
         this.electron.ipc.on('frame-data', (event, data)=>{
             if(data.noFrame){ this.recording = false; } else { this.recording = true; }
             if(this.events['frame']) this.events['frame'](data);
         });
 
-        this.socket.io.on('camera-error', (data)=>{
+        this.electron.ipc.on('camera-error', (data)=>{
             let alert = this.alert.create({
                 title: 'Camera Error',
                 message: data.message ? data.message : 'Non Descript Camera Error: ' + data.error,
@@ -37,5 +38,4 @@ export class CameraController{
     public on(event:string, callback){
         this.events[event] = callback;
     }
-
 }

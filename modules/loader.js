@@ -4,6 +4,12 @@ var loader;
 var interval;
 var quotes;
 
+var total = 10000;
+var intTime = 500;
+var quoteUp = 3000;
+var at = 0;
+
+
 function Init(){
     files.localGet({file: 'quotes.json'}).then((data)=>{
         quotes = data;
@@ -11,13 +17,14 @@ function Init(){
         loader = new BrowserWindow({
             title: 'Axe House',
             show: false,
-            width: 300,
+            width: 270,
             height: 450,
-            minWidth: 300,
+            minWidth: 270,
             minHeight: 450,
-            maxWidth: 300,
+            maxWidth: 270,
             maxHeight: 450,
-            //backgroundColor: '#ffffff',
+            resizable: false,
+            fullscreen: false,
             transparent: true,
             frame: false,
             icon: './www/assets/icon/favicon.png'
@@ -34,6 +41,8 @@ function Init(){
 ipcMain.on('loader', (e, data)=>{
     console.log('loader', data);
     if(data.action == 'init'){
+        at = 0;
+        clearInterval(interval);
         Load();
     }
 })
@@ -52,18 +61,20 @@ function Load() {
 
     //check move assets and scripts to needed folders
     interval = setInterval(()=>{
-        let quote = quotes[Math.floor(Math.random() * (quotes.length - 1))];
-        loader.webContents.send('loader', {
-            quote
-        });
-    }, 5000);
-    setTimeout(()=>{
-        loader.close();
-        global.windows['main-window'].show();
-        global.windows['main-window'].focus();
-        clearInterval(interval);
-    }, 10000)
-    
+        at += intTime;
+        let tmp = {};
+        if(at % quoteUp == 0) tmp.quote = quotes[Math.floor(Math.random() * (quotes.length - 1))];
+        tmp.progress = at * 100 / total;
+        loader.webContents.send('loader', tmp);
+        if(at >= total){
+            setTimeout(()=>{
+                loader.close();
+                global.windows['main-window'].show();
+                global.windows['main-window'].focus();
+                clearInterval(interval);
+            }, 500);
+        }
+    }, intTime);
 }
 
 module.exports.init = Init;

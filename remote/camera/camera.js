@@ -5,6 +5,7 @@ var cv = remote.require('opencv4nodejs');
 var interval;
 var vCap;
 var calibrated = false;
+var calibrating = false;
 var calibration_points = [];
 var stopCamera = false
 var time = { now: 0, last: 0, deltaTime: 0 };
@@ -26,6 +27,12 @@ ipcRenderer.on('update-settings', updateSettings);
 
 ipcRenderer.on('stop', ()=>{
     stopCamera = true;
+});
+
+ipcRenderer.on('calibrate', (e, data)=>{
+    if(data.action){
+
+    }
 })
 
 // IPC END
@@ -91,61 +98,11 @@ function run () {
             if(vCap) frame = vCap.read();
             if(frame){
                 returnData.size = { x: frame.cols, y: frame.rows };
-                
-                // pull points from frame
-                let blurred = frame.blur(new cv.Size(11,11));
-                let hsl = blurred.cvtColor(cv.COLOR_BGR2HLS);
-                let range = hsl.inRange(rangeLower, rangeUpper);
-                let mask = range.dilate(cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(4, 4)), new cv.Point(-1, -1), 3);
-                let cnts = mask.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-                let selectFrames = {
-                    'raw': frame,
-                    'mask': mask
-                }
-                if(cnts.length > 0){
-                    let newPoints = { };
-                    if(cnts.length > 0 && cnts.length <= 1){
+                returnData.points = getPoints(frame);
+                if(!calibrated){
 
-                    }
-                    cnts.forEach((c)=>{
-                        let point = c.minEnclosingCircle();
-                        if(point.radius > 3){
-
-                            let trackKeys = Object.keys(points);
-                            if(trackKeys.length > 0){
-                                // adjust tracking points
-                                let pointTracked = false;
-                                trackKeys.forEach((key, index)=>{
-                                    trackPoint = points[key];
-                                    let x = trackPoint.center.x - point.center.x;
-                                    let y = trackPoint.center.y - point.center.y;
-                                    if(Math.hypot(x,y) < 60){
-                                        newPoints[key] = point;
-                                        pointTracked = true;
-                                    }
-                                    if(trackKeys.length - 1 == index && !pointTracked){
-                                        let id = Math.random().toString(36).substr(2, 9);
-                                        newPoints[id] = point;
-                                    }
-                                })
-                            }else{
-                                // add new tracking points
-                                let id = Math.random().toString(36).substr(2, 9);
-                                newPoints[id] = point;
-                            }
-
-                        }
-                    });
-
-                    returnData.points = points = newPoints;
-                }
-                if(settings.preview && settings.preview != 'none'){
-                    cv.imshow('Preview', selectFrames[settings.preview]);
-                }else{
-                    cv.destroyAllWindows();
                 }
             }
-
             // finish time calc
             time.deltaTime = time.now - time.last;
             time.last = time.now;
@@ -161,4 +118,64 @@ function run () {
             ipcRenderer.send('frame-data', returnData);
         }
     },0)
+}
+
+function getPoints(frame){
+    // transform frame when calibrated
+
+    // pull points from frame
+    let blurred = frame.blur(new cv.Size(11,11));
+    // will want to increase contrast on blurred frame
+    let hsl = blurred.cvtColor(cv.COLOR_BGR2HLS);
+    let range = hsl.inRange(rangeLower, rangeUpper);
+    let mask = range.dilate(cv.getStructuringElement(cv.MORPH_ELLIPSE, new cv.Size(4, 4)), new cv.Point(-1, -1), 3);
+    let cnts = mask.findContours(cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
+    
+    // show preview
+    let selectFrames = {
+        'blurred': blurred,
+        'raw': frame,
+        'mask': mask
+    }
+    if(settings.preview && settings.preview != 'none'){
+        cv.imshow('Preview', selectFrames[settings.preview]);
+    }else{
+        cv.destroyAllWindows();
+    }
+
+    // get points from processed frame
+    if(cnts.length > 0){
+        let newPoints = { };
+        cnts.forEach((c)=>{
+            let point = c.minEnclosingCircle();
+            if(point.radius > 2){
+
+                let trackKeys = Object.keys(points);
+                if(trackKeys.length > 0){
+                    // adjust tracking points
+                    let pointTracked = false;
+                    trackKeys.forEach((key, index)=>{
+                        trackPoint = points[key];
+                        let x = trackPoint.center.x - point.center.x;
+                        let y = trackPoint.center.y - point.center.y;
+                        if(Math.hypot(x,y) < 60){
+                            newPoints[key] = point;
+                            pointTracked = true;
+                        }
+                        if(trackKeys.length - 1 == index && !pointTracked){
+                            let id = Math.random().toString(36).substr(2, 9);
+                            newPoints[id] = point;
+                        }
+                    })
+                }else{
+                    // add new tracking points
+                    let id = Math.random().toString(36).substr(2, 9);
+                    newPoints[id] = point;
+                }
+
+            }
+        });
+        points = newPoints;
+        return newPoints;
+    }
 }
