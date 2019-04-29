@@ -38,7 +38,8 @@ function createWindow() {
 
   // Event when the window is closed.
   win.on('closed', function () {
-    win = null
+    win = null;
+    app.quit();
   });
 
   global.windows['main-window'] = win;

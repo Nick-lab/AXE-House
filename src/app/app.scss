@@ -1,9 +1,6 @@
 // http://ionicframework.com/docs/theming/
 
 ion-app {
-    border: 1px solid #cecece;
-    border-radius: 3px;
-    
     ion-modal{
       top: 30px;
       height: calc(100% - 30px);
@@ -16,7 +13,19 @@ ion-app {
   
       ion-nav {
         top: 30px;
-        height: calc(100% - 32px);
+        height: calc(100% - 30px);
+        border-bottom: 1px;
+        border-left: 1px;
+        border-right: 1px;
+        border-top: 0px;
+        border-style: solid;
+        border-color: white;
+
+        &.full{
+          top: 0px;
+          height: 100%;
+          border: 0px;
+        }
 
         .ion-page {
           
@@ -30,96 +39,123 @@ ion-app {
       }
   
       .window {
-        -webkit-user-select: none;
-        -webkit-app-region: drag;
-  
-        #title {
-          display: inline-block;
-          margin: 0;
-          padding: 6px 0px 6px 10px;
-          font-size: 15px;
-          position: relative;
-        }
-  
-        .controls-left {
-          display: inline-block;
-          float: left;
-          position: relative;
-  
-          .button {
-  
-            ion-icon {
-              color: rgba(0,0,0,0.3);
-            }
-  
-            cursor: default;
-            display: inline-block;
-            padding: 7px;
-            text-align: center;
-            width: 50px;
-            height: 30px;
-            -webkit-app-region: no-drag;
+        position: relative;
+        z-index: 1;
+        
+        &.full{
+          .window-container{
+            -webkit-app-region: none;
+            background-color: white;
+            top: -30px;
+            transition: top .2s linear;
           }
-  
-          .button#btn-back {
-            font-size: 32px;
-            padding: 0px;
-  
-            ion-icon {
-              top: -4px;
-              position: relative;
-            }
-          }
-  
-          .button#btn-close:hover {
-            background-color: rgba(200,0,0,1);
-  
-            ion-icon {
-              color: rgba(255,255,255,1);
-            }
-          }
-  
-          .button:hover {
-            background-color: rgba(0,0,0,0.1);
-  
-            ion-icon {
-              color: rgba(0,0,0,1);
+
+          &:hover{
+            .window-container{
+              top: 0px;
+              transition: top .2s linear;
             }
           }
         }
-  
-        .controls {
-          display: inline-block;
-          float: right;
-  
-          .button {
-  
-            ion-icon {
-              color: rgba(0,0,0,0.3);
-            }
-  
-            cursor: default;
+
+        .window-container{
+          position: relative;
+          -webkit-user-select: none;
+          -webkit-app-region: drag;
+
+          #title {
             display: inline-block;
-            padding: 7px;
-            text-align: center;
-            width: 50px;
-            height: 30px;
-            -webkit-app-region: no-drag;
+            margin: 0;
+            padding: 6px 0px 6px 10px;
+            font-size: 15px;
+            position: relative;
           }
-  
-          .button#btn-close:hover {
-            background-color: rgba(200,0,0,1);
-  
-            ion-icon {
-              color: rgba(255,255,255,1);
+    
+          .controls-left {
+            display: inline-block;
+            float: left;
+            position: relative;
+    
+            .button {
+    
+              ion-icon {
+                color: rgba(0,0,0,0.3);
+              }
+    
+              cursor: default;
+              display: inline-block;
+              padding: 7px;
+              text-align: center;
+              width: 50px;
+              height: 30px;
+              -webkit-app-region: no-drag;
+            }
+    
+            .button#btn-back {
+              font-size: 32px;
+              padding: 0px;
+    
+              ion-icon {
+                top: -4px;
+                position: relative;
+              }
+            }
+    
+            .button#btn-close:hover {
+              background-color: rgba(200,0,0,1);
+    
+              ion-icon {
+                color: rgba(255,255,255,1);
+              }
+            }
+    
+            .button:hover {
+              background-color: rgba(0,0,0,0.1);
+    
+              ion-icon {
+                color: rgba(0,0,0,1);
+              }
             }
           }
+    
+          .controls {
+            display: inline-block;
+            float: right;
+    
+            .button {
+    
+              ion-icon {
+                color: rgba(0,0,0,0.3);
+              }
+    
+              cursor: default;
+              color: rgba(0,0,0,0.3);
+              display: inline-block;
+              padding: 7px;
+              text-align: center;
+              width: 50px;
+              height: 30px;
+              -webkit-app-region: no-drag;
   
-          .button:hover {
-            background-color: rgba(0,0,0,0.1);
-  
-            ion-icon {
+              &.flex{
+                width: unset;
+              }
+            }
+    
+            .button#btn-close:hover {
+              background-color: rgba(200,0,0,1);
+    
+              ion-icon {
+                color: rgba(255,255,255,1);
+              }
+            }
+    
+            .button:hover {
+              background-color: rgba(0,0,0,0.1);
               color: rgba(0,0,0,1);
+              ion-icon {
+                color: rgba(0,0,0,1);
+              }
             }
           }
         }

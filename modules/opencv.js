@@ -16,7 +16,7 @@ function createWindow() {
             show: false
         })
         CVWindow.loadURL(global.paths.remote + '/camera/camera.html');
-        //CVWindow.webContents.openDevTools();
+        CVWindow.webContents.openDevTools();
         CVWindow.webContents.on('did-finish-load', function() {
             res();
         });

@@ -1,12 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, ModalController } from 'ionic-angular';
+import { NavController } from 'ionic-angular';
 import { CameraController } from '../../app/services/camera.provider';
 
 import "pixi";
 import "p2";
 import * as Phaser from 'phaser-ce';
-import { Settings } from '../settings/settings';
-
 
 @Component({
   selector: 'page-home',
@@ -15,20 +13,20 @@ import { Settings } from '../settings/settings';
 export class HomePage {
   @ViewChild('container') container: any;
   config = {
-    width: 0,
-    height: 0,
-    renderer: Phaser.AUTO,
+    width: '100%',
+    height: '100%',
+    renderer: Phaser.CANVAS,
     antialias: true,
     parent: 'game-container'
   };
   game;
-  constructor(public navCtrl: NavController, private modal: ModalController, private camera: CameraController) {
+  constructor(public navCtrl: NavController, private camera: CameraController) {
 
   }
 
   ionViewWillEnter() {
-    this.config.width = this.container.nativeElement.scrollWidth;
-    this.config.height = this.container.nativeElement.scrollHeight;
+    // this.config.width = this.container.nativeElement.scrollWidth;
+    // this.config.height = this.container.nativeElement.scrollHeight;
     this.game = new Phaser.Game(this.config);
     this.game.state.add('main', Default, true);
     console.log(this.game);
@@ -38,9 +36,7 @@ export class HomePage {
     this.camera.Init();
   }
 
-  onOpenSettings() {
-    this.modal.create(Settings).present();
-  }
+  
 }
 
 
@@ -54,22 +50,20 @@ Default.prototype = {
   },
   create: function () {
     this.physics.startSystem(Phaser.Physics.ARCADE);
-
+    this.game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
     this.stage.backgroundColor = '#0072bc';
     this.fps = this.game.add.text(30,30, "FPS: ", { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
     this.pigs = [];
     this.points = {};
     this.graphics = this.game.add.graphics(0,0);
-    this.showonce = true;
+    this.once = true;
   },
   update: function () {
-    if(this.game.frameData && this.showonce){
-      console.log(this.game.frameData);
-      this.showonce = false;
-    }
     this.graphics.clear();
-    this.pointsProcess();
-    if(this.game.frameData) this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
+    if(this.game.frameData){
+      this.pointsProcess();
+      this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
+    }
   },
   createPig: function(){
     let pig = {
@@ -82,22 +76,20 @@ Default.prototype = {
     pig.sprite.animations.add('run');
     pig.sprite.animations.play('run', 16, true);
   },
-  createPoint: function (key, pos) {
-    let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
-    name.anchor.setTo(0.5, 1);
-    this.points[key] = { pos, name, counto: 1000 };
-  },
+
+
+
   pointsProcess: function () {
     let pointKeys = this.points ? Object.keys(this.points) : [];
-    
+
     if(this.game.frameData && Object.keys(this.game.frameData.points).length > 0){
       let newPoints = this.game.frameData.points;
       let newKeys = Object.keys(this.game.frameData.points);
       newKeys.forEach((k)=>{
         if(pointKeys.indexOf(k) > -1){
-          this.updatePoint(k, newPoints[k].center);
+          this.updatePoint(k, this.toScreenPos(newPoints[k].center));
         }else{
-          this.createPoint(k, newPoints[k].center);
+          this.createPoint(k, this.toScreenPos(newPoints[k].center));
         }
       });
       pointKeys.forEach((k)=>{
@@ -113,6 +105,40 @@ Default.prototype = {
     if(pointKeys.length > 0){
       pointKeys.forEach((k)=>{this.renderPoint(k);});
     }
+  },
+  toScreenPos: function (pos) {
+    let width = this.game.width > this.game.height;
+    let c = this.game.frameData.size;
+    let s = { x: this.game.width, y: this.game.height };
+    let newPos = {
+      x: !width ? (pos.x * (s.y * c.x / c.y) / c.x) - (((s.y * c.x / c.y) - s.x) / 2) : pos.x * s.x / c.x,
+      y: width ? (pos.y * (s.x * c.y / c.x) / c.y) - (((s.x * c.y / c.x) - s.y) / 2) : pos.y * s.y / c.y
+    };
+    // let r;
+    // let offset;
+    // if(width){
+    //   r = {
+    //     x: s.x,
+    //     y: s.x * c.y / c.x
+    //   }
+    //   offset = (r.y - s.y) / 2;
+    // }else{
+    //   r = {
+    //     x: s.y * c.x / c.y,
+    //     y: s.y
+    //   }
+    //   offset = (r.x - s.x) / 2;
+    // }
+    // let newPos = {
+    //   x: !width ? (pos.x * r.x / c.x) - offset : pos.x * r.x / c.x,
+    //   y: width ? (pos.y * r.y / c.y) - offset : pos.y * r.y / c.y
+    // };
+    return newPos;
+  },
+  createPoint: function (key, pos) {
+    let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
+    name.anchor.setTo(0.5, 1);
+    this.points[key] = { pos, name, counto: 1000, countat: 0, lerped: 0, tracking: true };
   },
   deletePoint: function (key) {
     this.points[key].name.destroy();
@@ -152,6 +178,7 @@ Default.prototype = {
         }else{
           point.tracking = true;
           point.countat = 0;
+          point.lerped = 0;
         }
       }else{
         point.tracking = false;
@@ -165,8 +192,5 @@ Default.prototype = {
   },
   lerp: function(start,end,amt){
     return (1-amt)*start+amt*end;
-  },
-  baconBurst: function(pointer) {
-
   }
 }

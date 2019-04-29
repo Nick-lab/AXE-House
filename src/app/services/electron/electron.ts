@@ -37,10 +37,12 @@ export class ElectronProvider {
   }
 
   isFullScreen() {
-    let window = BrowserWindow.getFocusedWindow();
-    if (window.isMaximized()) {
+    console.log(window, screen);
+    if (BrowserWindow.getFocusedWindow().isMaximized() || (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
+      this.fullscreen = true;
       return true;
     } else {
+      this.fullscreen = false;
       return false;
     }
   }

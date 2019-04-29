@@ -1,9 +1,10 @@
 import { Component, ViewChild } from '@angular/core';
-import { Platform, Events, Nav, App } from 'ionic-angular';
+import { Platform, Events, Nav, App, ModalController } from 'ionic-angular';
 import { ElectronProvider } from './services/electron/electron';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 
 import { HomePage } from '../pages/home/home';
+import { Settings } from '../pages/settings/settings';
 @Component({
   templateUrl: 'app.html',
   animations: [
@@ -45,7 +46,8 @@ export class MyApp {
     platform: Platform,
     public electron: ElectronProvider,
     public events: Events,
-    public app: App
+    public app: App,
+    private modal: ModalController
   ) {
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
@@ -135,6 +137,10 @@ export class MyApp {
     } else {
       this.hasControls.back = false;
     }
+  }
+
+  onOpenSettings() {
+    this.modal.create(Settings).present();
   }
 
   onMin() {

@@ -23,7 +23,7 @@ var settings = {
 
 ipcRenderer.on('init', init);
 
-ipcRenderer.on('update-settings', updateSettings);
+ipcRenderer.on('update-settings', (e, data)=>{updateSettings(data);});
 
 ipcRenderer.on('stop', ()=>{
     stopCamera = true;
@@ -40,7 +40,7 @@ ipcRenderer.on('calibrate', (e, data)=>{
 function init (e, options) {
     console.log(options);
     if(options){
-        Object.keys(options.settings).forEach((key)=>{settings[key] = options[key];});
+        settings = options.settings
         calibrated = options.calibrated;
         calibration_points = options.calibration_points;
     }
@@ -55,10 +55,11 @@ function init (e, options) {
             message: "Failed to open capture: Port 0"
         });
     }
+    updateSettings(settings);
     run();
 }
 
-function updateSettings (e, options) {
+function updateSettings (options) {
     Object.keys(options).forEach((key)=>{
         switch(key){
             case 'rangeLower':
@@ -177,5 +178,7 @@ function getPoints(frame){
         });
         points = newPoints;
         return newPoints;
+    }else{
+        return {};
     }
 }
