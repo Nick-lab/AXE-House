@@ -47,6 +47,8 @@ function init (e, options) {
     stopCamera = false;
     try {
         vCap = new cv.VideoCapture(0);
+        console.log('width', vCap.set(cv.CAP_PROP_FRAME_WIDTH, 640));
+        console.log('height',vCap.set(cv.CAP_PROP_FRAME_HEIGHT, 720));
         rangeLower = new cv.Vec(settings.lowerHSL.h, settings.lowerHSL.l, settings.lowerHSL.s);
         rangeUpper = new cv.Vec(settings.upperHSL.h, settings.upperHSL.l, settings.upperHSL.s);
     } catch (err){

@@ -30,7 +30,7 @@ function Init(){
             icon: './www/assets/icon/favicon.png'
         })
         loader.loadURL(global.paths.remote + '/loader/loader.html');
-        loader.webContents.openDevTools();
+        //loader.webContents.openDevTools();
         loader.webContents.on('did-finish-load', function() {
             loader.show();
             loader.focus();

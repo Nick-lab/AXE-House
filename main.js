@@ -33,7 +33,7 @@ function createWindow() {
   win.loadURL(`file://${__dirname}/www/index.html`);
 
   //// uncomment below to open the DevTools.
-
+  win.setMinimizable(false);
   win.webContents.openDevTools();
 
   // Event when the window is closed.

@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, TabHighlight } from 'ionic-angular';
 import { CameraController } from '../../app/services/camera.provider';
 
 import "pixi";
@@ -59,11 +59,26 @@ Default.prototype = {
     this.once = true;
   },
   update: function () {
+    // clear screen of raw visuals
     this.graphics.clear();
+
+    if (this.game.input.activePointer.leftButton.isDown) {
+      let mousePos = {x: this.game.input._x, y: this.game.input._y};
+      if(!this.points['cursor']) this.createPoint('cursor', mousePos);
+      else this.updatePoint('cursor', mousePos);
+    }else if(this.points['cursor']){
+      this.deletePoint('cursor');
+    }
+
+    // if frame data from backend Computer Vision process points
     if(this.game.frameData){
       this.pointsProcess();
       this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
     }
+
+    
+    
+
   },
   createPig: function(){
     let pig = {
@@ -93,54 +108,37 @@ Default.prototype = {
         }
       });
       pointKeys.forEach((k)=>{
-        if(!this.points[k].updated){
+        if(!this.points[k].updated && k != 'cursor'){
           this.deletePoint(k);
         }else{
           this.points[k].updated = false;
         }
       })
     }else if(pointKeys.length > 0){
-      pointKeys.forEach((k)=>{this.deletePoint(k);});
+      pointKeys.forEach((k)=>{if(k != 'cursor') this.deletePoint(k); });
     }
     if(pointKeys.length > 0){
       pointKeys.forEach((k)=>{this.renderPoint(k);});
     }
+
   },
   toScreenPos: function (pos) {
     let width = this.game.width > this.game.height;
     let c = this.game.frameData.size;
-    let s = { x: this.game.width, y: this.game.height };
     let newPos = {
-      x: !width ? (pos.x * (s.y * c.x / c.y) / c.x) - (((s.y * c.x / c.y) - s.x) / 2) : pos.x * s.x / c.x,
-      y: width ? (pos.y * (s.x * c.y / c.x) / c.y) - (((s.x * c.y / c.x) - s.y) / 2) : pos.y * s.y / c.y
+      x: !width ? (pos.x * (this.game.height * c.x / c.y) / c.x) - (((this.game.height * c.x / c.y) - this.game.width) / 2) : pos.x * this.game.width / c.x,
+      y: width ? (pos.y * (this.game.width * c.y / c.x) / c.y) - (((this.game.width * c.y / c.x) - this.game.height) / 2) : pos.y * this.game.height / c.y
     };
-    // let r;
-    // let offset;
-    // if(width){
-    //   r = {
-    //     x: s.x,
-    //     y: s.x * c.y / c.x
-    //   }
-    //   offset = (r.y - s.y) / 2;
-    // }else{
-    //   r = {
-    //     x: s.y * c.x / c.y,
-    //     y: s.y
-    //   }
-    //   offset = (r.x - s.x) / 2;
-    // }
-    // let newPos = {
-    //   x: !width ? (pos.x * r.x / c.x) - offset : pos.x * r.x / c.x,
-    //   y: width ? (pos.y * r.y / c.y) - offset : pos.y * r.y / c.y
-    // };
     return newPos;
   },
   createPoint: function (key, pos) {
+    console.log('Create Point '+ key +` at X:${pos.x}, Y:${pos.y}`);
     let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
     name.anchor.setTo(0.5, 1);
     this.points[key] = { pos, name, counto: 1000, countat: 0, lerped: 0, tracking: true };
   },
   deletePoint: function (key) {
+    console.log('Deleting Point '+ key);
     this.points[key].name.destroy();
     delete this.points[key];
   },
@@ -157,16 +155,19 @@ Default.prototype = {
   renderPoint: function(key) {
     if(this.points[key]){
       let point = this.points[key];
-    
+      console.log(key, point);
+      if(!point.lastPos) point.lastPos = point.pos;
       let pos = point.pos;
       let r = 10;
-      let dist = 10;
+      let dist = 5;
       this.graphics.lineStyle(0);
       this.graphics.beginFill(0xFFFF0B, .5);
       this.graphics.drawCircle(pos.x,pos.y,r);
       this.graphics.endFill();
       let xs = point.lastPos.x - pos.x;
       let ys = point.lastPos.y - pos.y;
+
+
       if(Math.hypot(xs,ys) < dist ){
         if(point.tracking){
           if(point.countat <= point.counto){
