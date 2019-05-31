@@ -40,9 +40,10 @@ export class HomePage {
 }
 
 
+// staging Default Scene
+
 function Default() {
 }
-
 Default.prototype = {
   preload: function () {
     this.load.image('ball', 'assets/game_assets/sprites/pangball.png');
@@ -57,15 +58,43 @@ Default.prototype = {
     this.points = {};
     this.graphics = this.game.add.graphics(0,0);
     this.once = true;
+    this.boardColors = ["E6FB04", "FF3300", "33FF00", "00FFFF"];
+    this.boards = [];
+    for(let i = 0; i < 4; i++){
+      this.boards.push(this.createBox([
+        {
+          x: 500/4 * i,
+          y: 0
+        },
+        {
+          x: 500/4 * (i + 1),
+          y: 0
+        },
+        {
+          x: 500/4 * (i + 1),
+          y: 500
+        },{
+          x: 500/4 * i,
+          y: 500
+        }
+      ]));
+    }
   },
   update: function () {
     // clear screen of raw visuals
     this.graphics.clear();
 
+
+    this.boards.forEach((board, i)=>{
+      this.graphics.beginFill('0x' + this.boardColors[i]);
+      this.graphics.drawPolygon(board.points);
+      this.graphics.endFill();
+    });
+
     if (this.game.input.activePointer.leftButton.isDown) {
       let mousePos = {x: this.game.input._x, y: this.game.input._y};
       if(!this.points['cursor']) this.createPoint('cursor', mousePos);
-      else this.updatePoint('cursor', mousePos);
+      else this.updatePoint('cursor', mousePos); 
     }else if(this.points['cursor']){
       this.deletePoint('cursor');
     }
@@ -75,25 +104,19 @@ Default.prototype = {
       this.pointsProcess();
       this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
     }
-
-    
-    
-
   },
-  createPig: function(){
-    let pig = {
-      pos: {
-        x: 0,
-        y: 0
-      },
-      sprite: this.game.add.sprite(this.game.width / 2, this.game.height / 2, 'pig')
+  resize: function(width, height){
+    console.log("Resized", width, height);
+  },
+  createBox: function(points = [{x: 0, y:0}]){
+    if(points){
+      let pointArr = [];
+      points.forEach((point)=>{
+        pointArr.push(new Phaser.Point(point.x,point.y));
+      });
+      return new Phaser.Polygon(pointArr);
     }
-    pig.sprite.animations.add('run');
-    pig.sprite.animations.play('run', 16, true);
   },
-
-
-
   pointsProcess: function () {
     let pointKeys = this.points ? Object.keys(this.points) : [];
 
@@ -142,20 +165,22 @@ Default.prototype = {
     this.points[key].name.destroy();
     delete this.points[key];
   },
-
   updatePoint: function (key, pos) {
     let point = this.points[key];
     point.lastPos = point.pos;
-    point.pos = {
-      x: this.lerp(point.lastPos.x, pos.x, .5),
-      y: this.lerp(point.lastPos.y, pos.y, .5)
-    };
+    if(key == 'cursor'){
+      point.pos = pos;
+    }else{
+      point.pos = {
+        x: this.lerp(point.lastPos.x, pos.x, .5),
+        y: this.lerp(point.lastPos.y, pos.y, .5)
+      };
+    }
     point.updated = true;
   },
   renderPoint: function(key) {
     if(this.points[key]){
       let point = this.points[key];
-      console.log(key, point);
       if(!point.lastPos) point.lastPos = point.pos;
       let pos = point.pos;
       let r = 10;

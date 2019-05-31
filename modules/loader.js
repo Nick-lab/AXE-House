@@ -4,7 +4,7 @@ var loader;
 var interval;
 var quotes;
 
-var total = 10000;
+var total = 1000;
 var intTime = 500;
 var quoteUp = 3000;
 var at = 0;
