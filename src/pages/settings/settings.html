@@ -32,20 +32,5 @@
                 <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.s"></ion-range>
             </ion-col>
         </ion-row>
-        <ion-row>
-            <ion-col>
-                <h4>Preview</h4>
-                <ion-item>
-                    <ion-select (ionChange)="onSend()" [(ngModel)]="settings.preview">
-                        <ion-option value="none">None</ion-option>
-                        <ion-option value="raw">Raw</ion-option>
-                        <ion-option value="mask">Mask</ion-option>
-                    </ion-select>
-                </ion-item>
-            </ion-col>
-        </ion-row>
-        <ion-row>
-            <input type="file">
-        </ion-row>
     </ion-grid>
 </ion-content>

@@ -38,6 +38,7 @@ export class MyApp {
     back: false
   };
   modals = [];
+  settings:any = null;
   @ViewChild('Nav') nav: Nav;
 
   rootPage: any = HomePage;
@@ -140,7 +141,16 @@ export class MyApp {
   }
 
   onOpenSettings() {
-    this.modal.create(Settings).present();
+    if(this.settings){
+      this.settings.dismiss();
+      this.settings = false;
+    }else{
+      this.settings = this.modal.create(Settings);
+      this.settings.onDidDismiss(()=>{
+        this.settings = false;
+      })
+      this.settings.present();
+    }   
   }
 
   onMin() {

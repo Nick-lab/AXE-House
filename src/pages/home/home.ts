@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { NavController, TabHighlight } from 'ionic-angular';
+import { NavController } from 'ionic-angular';
 import { CameraController } from '../../app/services/camera.provider';
 
 import "pixi";
@@ -35,8 +35,6 @@ export class HomePage {
     });
     this.camera.Init();
   }
-
-  
 }
 
 
@@ -60,24 +58,28 @@ Default.prototype = {
     this.once = true;
     this.boardColors = ["E6FB04", "FF3300", "33FF00", "00FFFF"];
     this.boards = [];
+    this.pointToHit = 200;
     for(let i = 0; i < 4; i++){
-      this.boards.push(this.createBox([
-        {
-          x: 500/4 * i,
-          y: 0
-        },
-        {
-          x: 500/4 * (i + 1),
-          y: 0
-        },
-        {
-          x: 500/4 * (i + 1),
-          y: 500
-        },{
-          x: 500/4 * i,
-          y: 500
-        }
-      ]));
+      let box = new this.Box();
+      box.init({
+        points: [
+          {
+            x: 500/4 * i,
+            y: 0
+          },{
+            x: 500/4 * (i + 1),
+            y: 0
+          },{
+            x: 500/4 * (i + 1),
+            y: 500
+          },{
+            x: 500/4 * i,
+            y: 500
+          } 
+        ]
+      });
+      console.log(i, box)
+      this.boards.push(box);
     }
   },
   update: function () {
@@ -87,7 +89,7 @@ Default.prototype = {
 
     this.boards.forEach((board, i)=>{
       this.graphics.beginFill('0x' + this.boardColors[i]);
-      this.graphics.drawPolygon(board.points);
+      this.graphics.drawPolygon(board.poly.points);
       this.graphics.endFill();
     });
 
@@ -108,14 +110,18 @@ Default.prototype = {
   resize: function(width, height){
     console.log("Resized", width, height);
   },
-  createBox: function(points = [{x: 0, y:0}]){
-    if(points){
-      let pointArr = [];
-      points.forEach((point)=>{
-        pointArr.push(new Phaser.Point(point.x,point.y));
-      });
-      return new Phaser.Polygon(pointArr);
-    }
+  Box: function(){
+    this.poly = null;
+
+    this.init = (options)=>{
+      if(options.points){
+        let pointArr = [];
+        options.points.forEach((point)=>{
+          pointArr.push(new Phaser.Point(point.x,point.y));
+        });
+        this.poly = new Phaser.Polygon(pointArr);
+      }
+    };
   },
   pointsProcess: function () {
     let pointKeys = this.points ? Object.keys(this.points) : [];
@@ -158,7 +164,7 @@ Default.prototype = {
     console.log('Create Point '+ key +` at X:${pos.x}, Y:${pos.y}`);
     let name = this.game.add.text(pos.x, pos.y - 10, key, { font: 'bold 10pt Arial', fill: 'white', align: 'left' });
     name.anchor.setTo(0.5, 1);
-    this.points[key] = { pos, name, counto: 1000, countat: 0, lerped: 0, tracking: true };
+    this.points[key] = { pos, name, counto: this.pointToHit, countat: 0, lerped: 0, tracking: true };
   },
   deletePoint: function (key) {
     console.log('Deleting Point '+ key);
@@ -186,7 +192,7 @@ Default.prototype = {
       let r = 10;
       let dist = 5;
       this.graphics.lineStyle(0);
-      this.graphics.beginFill(0xFFFF0B, .5);
+      this.graphics.beginFill(0xFFFF0B);
       this.graphics.drawCircle(pos.x,pos.y,r);
       this.graphics.endFill();
       let xs = point.lastPos.x - pos.x;
