@@ -46,13 +46,13 @@ function createWindow() {
 }
 
 ipcMain.on('local-store', (e, obj) => {
-  files.localStore().then((result)=>{
+  files.localStore(obj).then((result)=>{
     e.sender.send('local-store-reply', result);
   });
 });
 
 ipcMain.on('local-get', (e, obj) => {
-  files.localGet().then((result)=>{
+  files.localGet(obj).then((result)=>{
     e.sender.send('local-get-reply', result);
   });
 });

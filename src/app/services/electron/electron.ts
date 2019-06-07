@@ -37,7 +37,6 @@ export class ElectronProvider {
   }
 
   isFullScreen() {
-    console.log(window, screen);
     if (BrowserWindow.getFocusedWindow().isMaximized() || (window.innerWidth == screen.width && window.innerHeight == screen.height)) {
       this.fullscreen = true;
       return true;
@@ -47,18 +46,22 @@ export class ElectronProvider {
     }
   }
 
-  localSave(file, data){
-    this.ipc.send('local-store', {file, data });
-    this.ipc.once('local-store-reply', (e,reply)=>{
-      console.log('store response',reply);
-    });
+  localSave(file, data, json = true){
+    return new Promise((res)=>{
+      this.ipc.send('local-store', {file, data, json });
+      this.ipc.once('local-store-reply', (e,reply)=>{
+        res(reply);
+      });
+    })
   }
   
   localGet(file){
-    this.ipc.send('local-get', {file: file });
-    this.ipc.once('local-get-reply', (e,data)=>{
-      console.log('get response',data);
-    });
+    return new Promise((res)=>{
+      this.ipc.send('local-get', {file: file });
+      this.ipc.once('local-get-reply', (e,data)=>{
+        res(data);
+      });
+    })
   }
 
 }

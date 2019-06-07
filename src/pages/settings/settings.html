@@ -9,28 +9,99 @@
 <ion-content>
     <ion-grid>
         <ion-row>
-            <h4>Range Lower</h4>
             <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.h"></ion-range>
-            </ion-col>
-            <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.l"></ion-range>
-            </ion-col>
-            <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.s"></ion-range>
-            </ion-col>
-        </ion-row>
-        <ion-row>
-            <h4>Range Upper</h4>
-            <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.h"></ion-range>
-            </ion-col>
-            <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.l"></ion-range>
-            </ion-col>
-            <ion-col>
-                <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.s"></ion-range>
+                    <ion-segment [(ngModel)]="tab">
+                        <ion-segment-button value="camera">
+                            <ion-label>Camera Settings</ion-label>
+                        </ion-segment-button>
+                        <ion-segment-button value="game">
+                            <ion-label>Game Settings</ion-label>
+                        </ion-segment-button>
+                    </ion-segment>
             </ion-col>
         </ion-row>
     </ion-grid>
+    <ion-list *ngIf="tab == 'camera'">
+        <ion-list-header>
+            <ion-label>
+                Range Lower
+                <ion-badge slot="end" color="medium">H: {{ settings.rangeLower.h }}, L: {{ settings.rangeLower.l }}, S: {{ settings.rangeLower.s }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.h"></ion-range>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.l"></ion-range>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeLower.s"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Range Upper
+                <ion-badge slot="end" color="medium">H: {{ settings.rangeUpper.h }}, L: {{ settings.rangeUpper.l }}, S: {{ settings.rangeUpper.s }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.h"></ion-range>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.l"></ion-range>
+            <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.s"></ion-range>
+        </ion-item>
+    </ion-list>
+
+    <ion-list *ngIf="tab == 'game'">
+        <ion-list-header>
+            <ion-label>
+                Hit Delay
+                <ion-badge slot="end" color="medium">{{ gameSettings.pointToHit }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+                <ion-range min="1" max="1000" (ionChange)="onSettings()" [(ngModel)]="gameSettings.pointToHit"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Point Sensitivity
+                <ion-badge slot="end" color="medium">{{ gameSettings.pointSensitivity }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="3" max="200" (ionChange)="onSettings()" [(ngModel)]="gameSettings.pointSensitivity"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Board Size %
+                <ion-badge slot="end" color="medium">{{ gameSettings.boardSize }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="30" max="100" (ionChange)="onSettings()" [(ngModel)]="gameSettings.boardSize"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Board Size Offset
+                <ion-badge slot="end" color="medium">X: {{ gameSettings.boardSizeAdjust.x }}, Y: {{ gameSettings.boardSizeAdjust.y }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="-100" max="200" (ionChange)="onSettings()" [(ngModel)]="gameSettings.boardSizeAdjust.x"></ion-range>
+            <ion-range min="-100" max="200" (ionChange)="onSettings()" [(ngModel)]="gameSettings.boardSizeAdjust.y"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Board Position Offset
+                <ion-badge slot="end" color="medium">X: {{ gameSettings.boardPositionAdjust.x }}, Y: {{ gameSettings.boardPositionAdjust.y }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="-100" max="200" (ionChange)="onSettings()" [(ngModel)]="gameSettings.boardPositionAdjust.x"></ion-range>
+            <ion-range min="-100" max="200" (ionChange)="onSettings()" [(ngModel)]="gameSettings.boardPositionAdjust.y"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Plank Count
+                <ion-badge slot="end" color="medium">{{ gameSettings.plankCount }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="1" max="6" (ionChange)="onSettings()" [(ngModel)]="gameSettings.plankCount"></ion-range>
+        </ion-item>
+    </ion-list>
 </ion-content>
