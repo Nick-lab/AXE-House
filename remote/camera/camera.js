@@ -17,6 +17,7 @@ var settings = {
     preview: 'mask',
     lowerHSL: {h: 0, l: 100, s: 0},
     upperHSL: {h: 255,l: 255,s: 255},
+    camera: true
 }
 
 // IPC START
@@ -98,7 +99,7 @@ function run () {
         // check if stop camera called
         if(!stopCamera){
             let frame;
-            if(vCap) frame = vCap.read();
+            if(vCap && settings.camera) frame = vCap.read();
             if(frame){
                 returnData.size = { x: frame.cols, y: frame.rows };
                 returnData.points = getPoints(frame);
@@ -151,7 +152,7 @@ function getPoints(frame){
         let newPoints = { };
         cnts.forEach((c)=>{
             let point = c.minEnclosingCircle();
-            if(point.radius > 2){
+            if(point.radius > 1){
 
                 let trackKeys = Object.keys(points);
                 if(trackKeys.length > 0){

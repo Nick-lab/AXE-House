@@ -22,6 +22,19 @@
         </ion-row>
     </ion-grid>
     <ion-list *ngIf="tab == 'camera'">
+        <ion-item>
+            <ion-label>Enable Webcam</ion-label>
+            <ion-toggle [(ngModel)]="settings.camera" (ionChange)="onSend()"></ion-toggle>
+        </ion-item>
+        <ion-item>
+            <ion-label>Frame Preview</ion-label>
+            <ion-select placeholder="Select Preview" (ionChange)="onSend()" [(ngModel)]="settings.preview">
+                <ion-option value="none">None</ion-option>
+                <ion-option value="blurred">Blurred</ion-option>
+                <ion-option value="raw">Raw</ion-option>
+                <ion-option value="mask">Mask</ion-option>
+            </ion-select>
+        </ion-item>
         <ion-list-header>
             <ion-label>
                 Range Lower
@@ -44,6 +57,7 @@
             <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.l"></ion-range>
             <ion-range min="0" max="255" (ionChange)="onSend()" [(ngModel)]="settings.rangeUpper.s"></ion-range>
         </ion-item>
+
     </ion-list>
 
     <ion-list *ngIf="tab == 'game'">
@@ -102,6 +116,15 @@
         </ion-list-header>
         <ion-item>
             <ion-range min="1" max="6" (ionChange)="onSettings()" [(ngModel)]="gameSettings.plankCount"></ion-range>
+        </ion-item>
+        <ion-list-header>
+            <ion-label>
+                Player Count
+                <ion-badge slot="end" color="medium">{{ gameSettings.playerCount }}</ion-badge>
+            </ion-label>
+        </ion-list-header>
+        <ion-item>
+            <ion-range min="1" max="6" (ionChange)="onSettings()" [(ngModel)]="gameSettings.playerCount"></ion-range>
         </ion-item>
     </ion-list>
 </ion-content>

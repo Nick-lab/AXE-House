@@ -17,7 +17,14 @@ Planks.prototype = {
     this.graphics = this.game.add.graphics(0,0);
     this.once = true;
     this.boardColors = ["E6FB04", "FF3300", "33FF00", "00FFFF"];
-    this.boards = [];
+    this.Objects = [];
+
+    this.cpText = this.game.add.text(10, 100, "Player 1" , { font: "bold 12px Arial", fill: "#fff", align: "left" });
+    this.cpText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+    this.currentPlayer = 0;
+    this.players = [];
+    this.gameWon = false;
 
     // game vars
 
@@ -60,10 +67,22 @@ Planks.prototype = {
     } 
     this.graphics.clear();
 
-    this.boards.forEach((board, i)=>{
-      this.graphics.beginFill('0x' + this.boardColors[i % this.plankCount]);
-      this.graphics.drawPolygon(board.poly.points);
-      this.graphics.endFill();
+    if(this.gameWon && !this.gameOnce){
+      this.gameOnce = true;
+      this.wonText = this.game.add.text(this.game.width / 2, this.game.height / 2, "Player "+ (this.currentPlayer + 1) + " Won" , { font: "bold 32px Arial", fill: "#fff", align: "left" });
+      this.wonText.setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+      this.wonText.anchor.setTo(0.5, 1);
+    }
+    this.Objects.forEach((object, i)=>{
+      if(object.poly){
+        if(object.plank){
+          this.graphics.beginFill('0x' + (this.players[this.currentPlayer].plank == object.index ? this.boardColors[2] : this.boardColors[1]));
+          this.graphics.drawPolygon(object.poly.points);
+          this.graphics.endFill();
+        }
+      }else{
+        object.render();
+      }
     });
 
     if (this.game.input.activePointer.leftButton.isDown) {
@@ -80,11 +99,47 @@ Planks.prototype = {
       this.fps.text = "FPS: " + Math.round(this.game.frameData.fps);
     }
   },
+  hitPlank: function(index) {
+    if(!this.gameWon){
+      if(index == this.players[this.currentPlayer].plank){
+        if(this.players[this.currentPlayer].checkWin()){
+          this.gameWon = true;
+        }
+      }else{
+        this.currentPlayer = this.currentPlayer + 1 <= this.players.length -1 ? this.currentPlayer + 1 : 0;
+        this.cpText.setText("Player "+ (this.currentPlayer + 1));
+      }
+    }
+  },
+  resetGame: function(){
+    this.gameOnce = false;
+    this.gameWon = false;
+    this.currentPlayer = 0;
+    if(this.wonText) this.wonText.destroy();
+    this.cpText.setText("Player "+ (this.currentPlayer + 1));
+    this.players = [];
+    this.BoardResize();
+  },
   resize: function(){
+    if(this.wonText){
+      this.wonText.x = this.game.width / 2;
+      this.wonText.y = this.game.height / 2;
+    }
     this.BoardResize();
   },
   BoardResize: function (){
-    this.boards = [];
+    this.Objects = [];
+    if(this.game.playerCount != this.players.length){this.players = [];}
+    if(this.players.length < this.game.playerCount){
+      for(let i = 0; i < this.game.playerCount; i++){
+        let player = new this.Player();
+        player.init({
+          plank: this.game.plankCount - 1,
+          totalPlanks: this.game.plankCount - 1
+        });
+        this.players.push(player);
+      }
+    }
     let width = this.game.width > this.game.height;
     this.playArea.size = {
       x: (width ? this.game.height * (this.game.boardSize / 100) : this.game.width * (this.game.boardSize / 100)) + this.game.boardSizeAdjust.x ,
@@ -94,9 +149,15 @@ Planks.prototype = {
       x: (this.game.width / 2 - this.playArea.size.x / 2) + this.game.boardPositionAdjust.x,
       y: (this.game.height / 2 - this.playArea.size.y / 2) + this.game.boardPositionAdjust.y
     }
+    
+    let reset = new this.Reset();
+    reset.init({scene: this});
+    this.Objects.push(reset);
     for(let i = 0; i < this.game.plankCount; i++){
       let box = new this.Box();
       box.init({
+        index: i,
+        scene: this,
         points: [
           {
             x: (this.playArea.size.x/this.game.plankCount * i) + this.playArea.pos.x,
@@ -113,13 +174,63 @@ Planks.prototype = {
           } 
         ]
       });
-      this.boards.push(box);
+      this.Objects.push(box);
+    }
+  },
+  Reset: function () {
+    this.r = 100
+    this.pos = {
+      x: 0,
+      y: 0
+    }
+    this.init = (options) => {
+      this.scene = options.scene;
+      this.graphics = options.scene.graphics;
+      this.pos = {
+        x: this.scene.game.width - (this.r + 20),
+        y: this.r + 20
+      }
+    }
+    this.render = () => {
+      this.graphics.lineStyle(1, 0x00ff00, 1);
+      this.graphics.drawCircle(this.pos.x, this.pos.y, this.r);
+    }
+    this.checkHit = (pos) => {
+      let xs = this.pos.x - pos.x;
+      let ys = this.pos.y - pos.y;
+      if(Math.hypot(xs,ys) < this.r ){
+        this.scene.resetGame();
+      }
+    }
+  },
+  Player: function (){
+    this.plank = 0;
+    this.direction = -1;
+    this.totalPlanks = 3;
+    this.init = (options) => {
+      Object.keys(options).forEach((key)=>{ this[key] = options[key]; });
+    }
+    this.checkWin = () => {
+      if(this.plank == 0 && this.direction == -1) this.direction = 1;
+      this.plank += this.direction;
+      if(this.direction == 1 && this.plank == this.totalPlanks){
+        return true;
+      }else{
+        return false;
+      }
     }
   },
   Box: function(){
+    this.plank = true;
     this.poly = null;
-
+    this.checkHit = (pos)=>{
+      if(this.poly.contains(pos.x, pos.y)){
+        this.scene.hitPlank(this.index);
+      }
+    }
     this.init = (options)=>{
+      this.index = options.index;
+      this.scene = options.scene;
       if(options.points){
         let pointArr = [];
         options.points.forEach((point)=>{

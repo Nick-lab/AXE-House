@@ -20,7 +20,9 @@ export class Settings{
             h: 0,
             s: 0,
             l: 0
-        }
+        },
+        preview: 'none',
+        camera: true
     }
 
     gameSettings: any = {

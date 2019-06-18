@@ -78,20 +78,27 @@ export function renderPoint(key) {
         if(point.tracking){
           if(point.countat <= point.counto){
             point.countat += this.game.time.elapsed;
-          }
-          point.lerped = this.lerp(point.lerped, point.countat, 0.5);
-          this.graphics.lineStyle(5, 0x000000, 1);
-          this.graphics.arc(pos.x, pos.y, 10, 0, point.lerped * (Math.PI * 2) / point.counto, false);
+          }else if(!point.hitOnce){
+                point.hitOnce = true;
+                this.Objects.forEach((object)=>{
+                    if(object.checkHit) object.checkHit(pos);
+                })
+            }
+            point.lerped = this.lerp(point.lerped, point.countat, 0.5);
+            this.graphics.lineStyle(5, 0x000000, 1);
+            this.graphics.arc(pos.x, pos.y, 10, 0, point.lerped * (Math.PI * 2) / point.counto, false);
+            }else{
+                
+                point.tracking = true;
+                point.countat = 0;
+                point.lerped = 0;
+            }
         }else{
-          point.tracking = true;
-          point.countat = 0;
-          point.lerped = 0;
+            point.hitOnce = false;  
+            point.tracking = false;
+            point.countat = 0;
+            point.lerped = 0;
         }
-      }else{
-        point.tracking = false;
-        point.countat = 0;
-        point.lerped = 0;
-      }
 
       point.name.x = pos.x;
       point.name.y = pos.y - r / 2;
